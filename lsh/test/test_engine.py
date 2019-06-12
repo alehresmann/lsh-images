@@ -9,26 +9,24 @@ import numpy as np
 from ..lsh_engine import engine
 from .. import utils
 
+# def test_save_settings_in_file_should_pass():
+#    e = engine(dim=5, seeds=[5,7,9])
+#    e.save_settings('lsh_settings.json')
+#
+#    os.remove('lsh_settings.json')
+#
+#
+# def test_save_and_load_settings_in_file_should_pass():
+#    e = engine(dim=5, seeds=[5,7,9])
+#    e.save_settings('lsh_settings.json')
+#
+#    f = engine(dim=5)
+#    f.load_settings('lsh_settings.json')
+#
+#    assert all([s1 == s2 for s1, s2 in zip(e.get_settings(), f.get_settings())])
+#    os.remove('lsh_settings.json')
 
-def test_save_settings_in_file_should_pass():
-    e = engine(dim=5, seeds=[5,7,9])
-    e.save_settings('lsh_settings.json')
-
-    os.remove('lsh_settings.json')
-
-
-def test_save_and_load_settings_in_file_should_pass():
-    e = engine(dim=5, seeds=[5,7,9])
-    e.save_settings('lsh_settings.json')
-
-    f = engine(dim=5)
-    f.load_settings('lsh_settings.json')
-
-    assert all([s1 == s2 for s1, s2 in zip(e.get_settings(), f.get_settings())])
-    os.remove('lsh_settings.json')
-
-
-#def lsh_quality_tester(e, dim, function_quantity, vec_quantity, max_dist, q=None):
+# def lsh_quality_tester(e, dim, function_quantity, vec_quantity, max_dist, q=None):
 #    # This shouldn't be used by the interface but by implementations of the engine.
 #    max_val = 100
 #
@@ -56,7 +54,7 @@ def test_save_and_load_settings_in_file_should_pass():
 #    _helper_lsh_qt(e, q, large_vs, max_dist)
 #
 #
-#def _helper_lsh_qt(e, q, vectors, max_dist):
+# def _helper_lsh_qt(e, q, vectors, max_dist):
 #    # helper func for testing hash functions on specific vectors
 #    q_hash = e.hash(q)
 #    false_negatives = 0

@@ -14,39 +14,55 @@ try:
     import plotly.graph_objs as go
     graphing = True
 except ImportError:
+    print("Couldn't find plotly, not making visual graphs. If you want them, "
+          "install the plotly package with: pip install --user plotly")
     graphing = False
 
-
-#def test_on_actual_image():
+# def test_on_actual_image():
 #    hash_accuracy(100, 100, 'smart_hyperplane', 10, 5, 1000)
 
-#def test_naive_hp_engine():
-#    print('\n\nTesting naive hyperplane engine.')
-#    _hash_accuracy_helper(10, 50, 'hyperplane', 5, 10, 1000)
 
-#def test_smart_hp_engine():
-#    print('\n\nTesting smarter hyperplane engine.')
-#    _hash_accuracy_helper(50, 50, 'smart_hyperplane', 3, 20, 1000)
+def test_naive_hp_engine():
+    print('\n\nTesting naive hyperplane engine.')
+    _hash_accuracy_helper(100, 100, 'hyperplane', 5, 10, 1000)
+
+
+def test_smart_hp_engine():
+    print('\n\nTesting smarter hyperplane engine.')
+    _hash_accuracy_helper(100, 100, 'smart_hyperplane', 3, 20, 1000)
+
 
 def test_cp_engine():
     print('\n\nTesting cross polytope engine.')
-    _hash_accuracy_helper(50, 100, 'cross_polytope', 10, 1, 1000)
+    _hash_accuracy_helper(100, 100, 'cross_polytope', 10, 1, 1000)
 
-def _hash_accuracy_helper(dim, dist, engine, k, l, candidate_quant, q=None, max_val=None):
-    #TODO: make this into a class
+
+def _hash_accuracy_helper(dim,
+                          dist,
+                          engine,
+                          k,
+                          l,
+                          candidate_quant,
+                          q=None,
+                          max_val=None):
+    # TODO: make this into a class
     if max_val is None:
         max_val = 100
     if q is None:
         q = np.random.randint(-max_val, max_val, size=dim)
     builder = facade_builder()
-    f = builder.with_dim(dim).with_dist(dist).with_engine(engine).with_k(k).with_l(l).with_a(1).build_struct()
+    f = builder.with_dim(dim).with_dist(dist).with_engine(engine).with_k(
+        k).with_l(l).with_a(1).build_struct()
 
     f.setup(q, dist, k)
 
-    print('Vectors with euclidean distances of:', 0, 'to' , dist)
-    under = _inner_helper(f, q, _generate_vectors_helper(candidate_quant, q, 0, dist), dist)
+    print('Vectors with euclidean distances of:', 0, 'to', dist)
+    under = _inner_helper(
+        f, q, _generate_vectors_helper(candidate_quant, q, 0, dist), dist)
     print('Vectors with euclidean distances of:', dist + 1, 'to', 10 * dist)
-    over = _inner_helper(f, q, _generate_vectors_helper(candidate_quant, q, dist + 1, 10*dist), dist)
+    over = _inner_helper(
+        f, q, _generate_vectors_helper(candidate_quant, q, dist + 1,
+                                       10 * dist), dist)
     if graphing:
         nn_dists = []
         nnn_dists = []
@@ -77,8 +93,8 @@ def _inner_helper(f, q, vectors, dist):
         elif is_near_neighbour and actual_dist > dist:
             false_positives += 1
 
-    print('Out of', len(vectors), 'reported', false_negatives,\
-        '\tfalse negatives and', false_positives, '\tfalse positives.')
+    print('Out of', len(vectors), 'reported', false_negatives,
+          '\tfalse negatives and', false_positives, '\tfalse positives.')
     if graphing:
         return [near_neighbour_dists, not_near_neighbour_dists]
 
@@ -93,9 +109,23 @@ def _generate_vectors_helper(candidate_quant, q, min_dist, max_dist):
 
 def graph(nn_dists, nnn_dists, length, engine):
     x = list(range(1, len(nn_dists)))
-    nn = go.Scatter(x=x, y=nn_dists, mode='markers', marker = dict(color = 'green'), name='nn')
+    nn = go.Scatter(x=x,
+                    y=nn_dists,
+                    mode='markers',
+                    marker=dict(color='green'),
+                    name='nn')
     x = list(range(len(nn_dists) + 1, len(nn_dists) + 1 + len(nnn_dists)))
-    nnn = go.Scatter(x=x, y=nnn_dists, mode='markers', marker = dict(color = 'red'), name='not nn')
+    nnn = go.Scatter(x=x,
+                     y=nnn_dists,
+                     mode='markers',
+                     marker=dict(color='red'),
+                     name='not nn')
     data = [nn, nnn]
-    py.plot({'data': data,'layout':{'title': engine,'font': dict(size=16)}}, filename='testing_engines.html')
-
+    py.plot({
+        'data': data,
+        'layout': {
+            'title': engine,
+            'font': dict(size=16)
+        }
+    },
+            filename='testing_engines.html')
