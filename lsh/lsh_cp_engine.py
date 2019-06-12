@@ -7,6 +7,53 @@ import itertools
 from .lsh_engine import engine
 from . import utils
 
+
+def generate_cp(radius, dim):
+    """Generate the "original" or "default" cross polytope on given,
+    dimensions and radius, aka:
+    [[radius, 0, 0, ...],
+     [0, radius, 0, 0, ...]
+     ...
+     [-radius, 0, 0, 0 ...]
+     ...]
+    Each row is a different point. The result is actually the matrix above,
+    but transposed"""
+
+    points = np.ndarray(shape=[2 * dim, dim])
+    first_point = np.array([0] * dim)
+    first_point[0] = radius
+    points[0, :] = first_point
+    i = 0
+    val = radius
+    for point in range(1, dim * 2):
+        first_point[i] = 0
+        i += 1
+        if i == dim:
+            val = -radius
+            i = 0
+        first_point[i] = val
+        points[point, :] = first_point
+    return np.array(points)
+
+
+def apply_rotation_on_cp(cp, rotation_matrix):
+    # apply given rotation on a particular cross polytope
+    # TODO: This is potentially super inefficient
+    # TODO: better solution: generate a unit CP, do
+    # rotated_cp = np.concatenate((rotation_matrix, -rotation_matrix) * radius
+    for point in range(len(cp)):
+        cp[point] = np.dot(rotation_matrix, cp[point].T)
+
+
+def apply_random_rotation_on_cp(seed, cp, dim):
+    # Apply random_point_rotation with the same seed on all points of a
+    # given cross polytope.
+    # TODO: this isn't a super useful function, maybe remove
+
+    random_rotation_matrix = utils.random_rot(dim, seed)
+    apply_rotation_on_cp(cp, random_rotation_matrix)
+
+
 class cp_engine(engine):
     def __init__(self, dim, seeds=[]):
         engine.__init__(self, dim, seeds)
@@ -19,41 +66,42 @@ class cp_engine(engine):
     def setup(self, q, dist, k):
         dist = round(dist / 2)
         cp_radius = self._get_max_radius(q, dist)  # Radius of the n-sphere on
-                                    # which the cross polytope is inscribed. In the
-                                    # first round, it is euclid_dist(query) + dist
+        # which the cross polytope is inscribed. In the
+        # first round, it is euclid_dist(query) + dist
 
-        cp_origin = [0]* self.dim   # Origin point of the cross polytope.
-                                    # First, it's located at the origin.
-                                    # For every round hereafter, it is located
-                                    # at one of the previous cross polytope's
-                                    # vertices
-        seeds       = []
-        indexes     = []
-        radii       = [cp_radius]
+        cp_origin = [0] * self.dim  # Origin point of the cross polytope.
+        # First, it's located at the origin.
+        # For every round hereafter, it is located
+        # at one of the previous cross polytope's
+        # vertices
+        seeds = []
+        indexes = []
+        radii = [cp_radius]
 
         for i in range(k):
-            original_cp     = utils.generate_cp(cp_radius, self.dim)  #TODO: switch dim and radius order of params
-            best_cp_point   = None
-            best_seed       = None
-            best_index      = None
-            best_dist       = math.inf
+            # TODO: switch dim and radius order of params
+            original_cp = generate_cp(cp_radius, self.dim)
+            best_cp_point = None
+            best_seed = None
+            best_index = None
+            best_dist = math.inf
 
             made_valid_cp = False
-            count = 0
             print('\n')
             for attempts in range(200):  # make this a 'tolerance' parameter
                 # generate a random cp, move it to the origin given
                 cp = original_cp.copy()
                 seed = utils.generate_random_seeds(1)[0]
-                utils.apply_rotation_on_cp(cp, utils.random_rot(self.dim, seed))
+                apply_rotation_on_cp(cp, utils.random_rot(self.dim, seed))
                 cp += cp_origin
                 # verify cp. If its a good cp, check the distance of the point
                 # q is hashed to. if its better than our best cp, keep it
                 if self._verify_cp(cp, q, dist, cp_radius - dist):
                     print('GOT ONE')
                     made_valid_cp = True
-                    q_hash, cp_dist = self.cp_hash(cp, q)  # note: we already hashed it once, in verify cp. expensive to do it again
-                    if cp_dist < best_dist: # is this truly the best cp available? find heuristic for choosing cp
+                    # note: we already hashed it once, in verify cp. expensive to do it again
+                    q_hash, cp_dist = self.cp_hash(cp, q)
+                    if cp_dist < best_dist:  # is this truly the best cp available? find heuristic for choosing cp
                         best_cp_point = cp[q_hash].copy()
                         best_seed = seed
                         best_index = q_hash
@@ -66,7 +114,9 @@ class cp_engine(engine):
                 radii.append(cp_radius)
                 cp_origin = best_cp_point  # move origin of next cross polytope
             else:
-                print('After many attempts, unable to generate any more cp. Halting now')
+                print(
+                    'After many attempts, unable to generate any more cp. Halting now'
+                )
                 break
 
         self.seeds = seeds
@@ -78,11 +128,12 @@ class cp_engine(engine):
         # aka get the unit vector of the query, extend it by R, then move it to q.
         # Get the euclidean distance of this vector from the origin, this will
         # be the radius of the n-sphere on which the first cross polytope is defined.
-        return np.ceil(utils.euclidean_dist(utils.unit_vector(q) * dist + q, [0] * len(q)))
+        return np.ceil(
+            utils.euclidean_dist(
+                utils.unit_vector(q) * dist + q, [0] * len(q)))
 
     def cp_hash(self, cp, v):
-        min_dist   = math.inf
-        hash_point = math.inf
+        min_dist = math.inf
         for i in range(len(cp)):
             dist = utils.euclidean_dist(v, cp[i])
             if dist < min_dist:
@@ -97,11 +148,11 @@ class cp_engine(engine):
         for i in range(len(self.seeds)):
             if utils.euclidean_dist(origin, v) > self.radii[i]:
                 return -1
-            cp = utils.generate_cp(self.radii[i], self.dim)
+            cp = generate_cp(self.radii[i], self.dim)
             # we only care about the point on which q was hashed to. So, normally, we'd only rotate that point, and check if v is within a set distance to it. If no, we can skip the hashing part altogether.
-            utils.apply_rotation_on_cp(cp, utils.random_rot(self.dim, self.seeds[i]))
+            apply_rotation_on_cp(cp, utils.random_rot(self.dim, self.seeds[i]))
             cp += origin
-            #if utils.euclidean_dist(cp[self.indexes[i]], v) >
+            # if utils.euclidean_dist(cp[self.indexes[i]], v) >
             hashes.append(self.cp_hash(cp, v)[0])
             origin = cp[self.indexes[i]]
         return ''.join(map(str, hashes))
@@ -112,7 +163,7 @@ class cp_engine(engine):
         dists = [utils.euclidean_dist(q, cp[i]) for i in range(len(cp))]
         min_index = dists.index(min(dists))
         min_dist = dists[min_index]
-        #if min_dist + dist > upper_bound:  # Normally we'd want this to be true: That is, that the more cps we generate, the smaller they get. But, in higher dimensions, this nearly always ends up failing. As in, nearly all rotations end up with a point hashed with a pretty big euclidean distance to q. Why ?
+        # if min_dist + dist > upper_bound:  # Normally we'd want this to be true: That is, that the more cps we generate, the smaller they get. But, in higher dimensions, this nearly always ends up failing. As in, nearly all rotations end up with a point hashed with a pretty big euclidean distance to q. Why ?
         #    print('too big')
         #    return False
         for i in range(len(dists)):
@@ -123,7 +174,7 @@ class cp_engine(engine):
                 return False
         return True
 
-    def load_settings(self, js): # override
+    def load_settings(self, js):  # override
         engine.load_settings(self, js)
         self.radii = js['radii']
         self.indexes = js['indexes']

@@ -7,12 +7,14 @@ import numpy as np
 
 from . import utils
 
+
 class engine:
     # interface for an lsh engine, aka an LSH function family.
 
     def __init__(self, dim, seeds=[]):
         if dim < 1:
-            raise ValueError('engine\'s dimension parameter cannot be less than 1.')
+            raise ValueError(
+                'engine\'s dimension parameter cannot be less than 1.')
             sys.exit(0)
         self.dim = dim
         self.seeds = seeds  # seed(s) for each function
@@ -37,21 +39,23 @@ class engine:
     def load_settings(self, js):
         if js['python_version'] != str(sys.version_info[:2]):
             warnings.warn('Warning: This LSH struct was generated in python ' +
-                    js['python_version'] + ' whereas you\'re on ' \
-                    + str(sys.version_info[:2]) + ', you probably want' \
-                    'to verify that nothing has changed that may affect' \
-                    ' the random generator.')
+                          js['python_version'] + ' whereas you\'re on ' +
+                          str(sys.version_info[:2]) + ', you probably want'
+                          'to verify that nothing has changed that may affect'
+                          ' the random generator.')
 
         if js['np_version'] != str(np.__version__):
-            warnings.warn('Warning: This LSH struct was generated with numpy ' +
-                    js['np_version'] + ' whereas you\'re on '\
-                    + np.__version__ +', you probably want to verify that ' \
-                    'nothing has changed that may affect the random generator.')
+            warnings.warn(
+                'Warning: This LSH struct was generated with numpy ' +
+                js['np_version'] + ' whereas you\'re on ' + np.__version__ +
+                ', you probably want to verify that '
+                'nothing has changed that may affect the random generator.')
         self.seeds = js['seeds'].copy()
 
     def save_settings(self, filename=None):
         if filename is None:
-            filename = ('lsh_settings_' + str(datetime.datetime.now()) + '.txt')
+            filename = ('lsh_settings_' + str(datetime.datetime.now()) +
+                        '.txt')
         with open(filename, 'w') as f:
             json.dump(self.get_settings(), f)
         f.close()
