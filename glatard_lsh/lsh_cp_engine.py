@@ -99,7 +99,8 @@ class cp_engine(engine):
                 if self._verify_cp(cp, q, dist, cp_radius - dist):
                     print('GOT ONE')
                     made_valid_cp = True
-                    # note: we already hashed it once, in verify cp. expensive to do it again
+                    # note: we already hashed it once, in verify cp. expensive
+                    # to do it again
                     q_hash, cp_dist = self.cp_hash(cp, q)
                     if cp_dist < best_dist:  # is this truly the best cp available? find heuristic for choosing cp
                         best_cp_point = cp[q_hash].copy()

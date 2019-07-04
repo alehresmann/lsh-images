@@ -1,5 +1,3 @@
-import itertools
-import warnings
 import math
 
 import numpy as np
@@ -8,7 +6,9 @@ from .. import utils
 
 
 def test_unit_vector():
-    # make random vector. get unit vector. check euclid distance = 1 and cosine dist to original = 0
+    # TODO:
+    # make random vector. get unit vector.
+    # check euclid distance = 1 and cosine dist to original = 0
     pass
 
 
@@ -31,7 +31,7 @@ def test_muller_generation_generates_unit_vectors():
             assert round(a, 8) == round(b, 8)
 
 
-def test_cosine_distance():
+def test_cosine_similarity():
     dim = 100
     vq = 1000  # vector quant
     max_val = 100
@@ -49,6 +49,7 @@ def test_cosine_distance():
     assert average * math.sqrt(dim) > 0.7 and average * math.sqrt(dim) < 0.9
 
 
+# TODO:
 # def test_perturb_vector():
 #    dim = 100
 #    vq = 1000  # vector quant

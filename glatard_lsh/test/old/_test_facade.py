@@ -1,18 +1,12 @@
 import numpy as np
 import random
-import math
-
-from ..lsh_smart_hp_engine import smart_hp_engine
-from . import test_engine
-from .. import utils
-from ..lsh_facade import facade_builder, facade
 
 # for graphing of vector acceptance / rejection
 try:
-    from plotly import tools
     import plotly.offline as py
     import plotly.graph_objs as go
     graphing = True
+
 except ImportError:
     print("Couldn't find plotly, not making visual graphs. If you want them, "
           "install the plotly package with: pip install --user plotly")

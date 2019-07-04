@@ -2,14 +2,13 @@ import itertools
 
 import numpy as np
 
-from ..lsh_hp_engine import hyperplane_engine
-from . import test_engine
-from .. import utils
+#from ..lsh_hp_engine import hyperplane_engine
+#from . import test_engine
+#from .. import utils
+#
+#from ..lsh_cp_engine import cp_engine
 
-from ..lsh_cp_engine import cp_engine
-
-
-#def test_verify_generate_cp():
+# def test_verify_generate_cp():
 #    dim = 3
 #    c = cp_engine(3, None)
 #    # a cross polytope of dimension 3, with a radius of 5
@@ -18,7 +17,7 @@ from ..lsh_cp_engine import cp_engine
 #        for true_el, act_el in zip(true_row, act_row):
 #            assert true_el == act_el
 #
-#def _verify_rotations_helper(points):
+# def _verify_rotations_helper(points):
 #    # return distance of all points from each other and from the origin
 #    from_each_other = []
 #    from_origin = []
@@ -30,7 +29,7 @@ from ..lsh_cp_engine import cp_engine
 #        from_origin.append(utils.euclidean_dist( [0] * len(points[0]), points[i]))
 #    return [from_each_other, from_origin]
 #
-#def test_verify_cp_rotation():
+# def test_verify_cp_rotation():
 #    # generate a default cp. get distances. rotate it, check if distances are the same.
 #    dim = 3
 #    c = cp_engine(dim, None)

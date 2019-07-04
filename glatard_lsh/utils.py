@@ -1,7 +1,14 @@
 """A series of various helper functions mostly for ease of use."""
-
+from enum import Enum
 import numpy as np
-from random import gauss
+
+
+class dist_type(Enum):
+    # __order__ lets you loop on all possible enum values.
+    __order__ = 'SSD EUCLIDEAN COSINE'
+    SSD = "SSD"
+    EUCLIDEAN = "EUCLIDEAN"
+    COSINE = "COSINE"
 
 
 def unit_vector(v):
@@ -12,22 +19,20 @@ def euclidean_dist(v1, v2):
     return np.linalg.norm(v1 - v2)
 
 
-def euclidean_similarity(v1, v2):
-    sim = 1 / (1 + euclidean_dist(v1, v2))
-    if sim > 1:  # occasional misshap from python's floating points
-        sim = 1
-    elif sim < -1:
-        sim = -1
+def ssd_dist(v1, v2):
+    return euclidean_dist(v1, v2)**2
 
 
-def cosine_similarity(v1, v2):
-    sim = abs(np.dot(v1, v2) / (np.linalg.norm(v1) * np.linalg.norm(v2)))
-    if sim > 1:  # occasional misshap from python's floating points
-        sim = 1
-    elif sim < -1:
-        sim = -1
+def cosine_dist(v1, v2):
+    return 1.0 - np.dot(v1, v2) / (np.linalg.norm(v1) * np.linalg.norm(v2))
 
-    return cosine_similarity
+def dist(v1, v2, dist):
+    if dist == dist_type.EUCLIDEAN.value:
+        return euclidean_dist(v1, v2)
+    elif dist == dist_type.COSINE.value:
+        return cosine_dist(v1, v2)
+    if dist == dist_type.SSD.value:
+        return ssd_dist(v1, v2)
 
 
 def orthog_projection(v1, v2):
@@ -36,7 +41,8 @@ def orthog_projection(v1, v2):
 
 
 def generate_random_seeds(quant: int, seed=None):
-    "Gives you a series of random seeds generated from one seed. Useful for generating many structures from one seed."
+    """Gives you a series of random seeds generated from one seed.
+    Useful for generating many structures from one seed."""
     np.random.seed(seed)
     return np.random.randint(2**32 - 1, size=quant).tolist()
 
@@ -74,7 +80,9 @@ def perturb_vector(v, euclidean_distance, maximum=None):
         elif perturbed[i] > maximum:
             perturbed[i] = maximum
         if dist > euclidean_distance:
-            # if pertrubed too much, restart. Maybe this is bad for really big vectors, find better way of handling this.
+            # if pertubed too much, restart.
+            # Maybe this is bad for really big vectors, find better way of
+            # handling this.
             perturbed = v.copy()
 
     return perturbed

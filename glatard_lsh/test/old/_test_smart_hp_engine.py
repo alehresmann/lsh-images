@@ -1,8 +1,8 @@
 import numpy as np
 
-from ..lsh_smart_hp_engine import smart_hp_engine
-from . import test_engine
-from .. import utils
+#from ..lsh_smart_hp_engine import smart_hp_engine
+#from . import test_engine
+#from .. import utils
 
 # def test_verify_accuracy_of_smart_hyperplane_cosine():
 #    dim = 1000
